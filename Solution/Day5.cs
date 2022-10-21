@@ -9,7 +9,6 @@ namespace AdventOfCode2021.Solution
 {
     public class Day5
     {
-        
         public class Line
         {
             public Point a { get; set; }
