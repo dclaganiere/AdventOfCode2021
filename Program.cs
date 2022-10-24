@@ -1,7 +1,7 @@
 ﻿
 using AdventOfCode2021.Solution;
 
-Day17 day = new();
+Day18 day = new();
 
 day.SolveA();
 day.SolveB();
