@@ -81,7 +81,7 @@ namespace AdventOfCode2021.Solution
             // Skip comma
             index++;
 
-            // Left
+            // Right
             if (line[index] == '[')
             {
                 parent.Right = new Node()
@@ -112,7 +112,6 @@ namespace AdventOfCode2021.Solution
                 return true;
             }
 
-            // Explode
             if (depth == 4 && n.Left != null && n.Right != null)
             {
                 // Update left value
