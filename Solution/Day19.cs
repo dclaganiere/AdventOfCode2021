@@ -292,15 +292,15 @@ namespace AdventOfCode2021.Solution
         {
             HashSet<Beacon> hs1 = new HashSet<Beacon>(s1);
 
-            int idx = rng.Next(s1.Count);
+            int idx = rng.Next(s2.Count);
 
             for (int i = 0; i < 24; i++)
             {
                 var rotatedS2 = s2.Select(b => b.GetRotation(i)).ToList();
 
-                for (int k = 0; k < rotatedS2.Count; k++)
+                for (int k = 0; k < s1.Count; k++)
                 {
-                    var (x, y, z) = GetOffset(s1[idx], rotatedS2[k]);
+                    var (x, y, z) = GetOffset(s1[k], rotatedS2[idx]);
 
                     var offsetS2 = rotatedS2.Select(b => new Beacon(b.x + x, b.y + y, b.z + z)).ToList();
                     HashSet<Beacon> hs2 = new HashSet<Beacon>(offsetS2);
