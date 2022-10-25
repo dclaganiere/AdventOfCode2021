@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
@@ -142,6 +143,8 @@ namespace AdventOfCode2021.Solution
             }
         }
 
+        private Random rng = new Random();
+
         public void SolveA()
         {
             using StreamReader reader = new StreamReader("Input\\Day19.txt");
@@ -165,58 +168,29 @@ namespace AdventOfCode2021.Solution
                 scanners.Add(beacons);
             }
 
-            while (scanners.Count > 1)
+            bool[] visited = new bool[scanners.Count];
+            while (visited.Count(v => !v) > 1)
             {
-                bool combined = false;
-                for (int i = 0; i < scanners.Count; i++)
-                {
-                    for (int j = i + 1; j < scanners.Count; j++)
-                    {
-                        combined = CombineScanners(scanners[i], scanners[j]);
+                (int x, int y, int z, int rot) combined = (0, 0, 0, -1);
 
-                        if (combined)
-                        {
-                            Console.WriteLine($"Scanners {i} and {j} align, remaining {scanners.Count - 1}");
-                            scanners.RemoveAt(j);
-                            j--;
-                        }
+                for (int j = 1; j < scanners.Count; j++)
+                {
+                    if (visited[j])
+                    {
+                        continue;
+                    }
+
+                    combined = CombineScanners(scanners[0], scanners[j]);
+
+                    if (combined.rot != -1)
+                    {
+                        visited[j] = true;
+                        Console.WriteLine($"Scanners {0} and {j} align, remaining {visited.Count(v => !v)}");
                     }
                 }
             }
 
             Console.WriteLine(scanners[0].Count);
-        }
-
-        private bool CombineScanners(List<Beacon> s1, List<Beacon> s2)
-        {
-            HashSet<Beacon> hs1 = new HashSet<Beacon>(s1);
-
-            for (int i = 0; i < 24; i++)
-            {
-                var rotatedS2 = s2.Select(b => b.GetRotation(i)).ToList();
-
-                for (int j = 0; j < s1.Count; j++)
-                {
-                    for (int k = 0; k < rotatedS2.Count; k++)
-                    {
-                        var (x, y, z) = GetOffset(s1[j], rotatedS2[k]);
-
-                        var offsetS2 = rotatedS2.Select(b => new Beacon(b.x + x, b.y + y, b.z + z)).ToList();
-                        HashSet<Beacon> hs2 = new HashSet<Beacon>(offsetS2);
-
-                        if (hs1.Intersect(hs2).Count() >= 12)
-                        {
-                            s1.AddRange(hs2.Except(hs1));
-
-                            s2.Clear();
-
-                            return true;
-                        }
-                    }
-                }
-            }
-
-            return false;
         }
 
         private (int x, int y, int z) GetOffset(Beacon beacon1, Beacon beacon2)
@@ -254,39 +228,24 @@ namespace AdventOfCode2021.Solution
                 distances[i] = new Dictionary<int, (int r, int x, int y, int z)>();
             }
 
-
             while (visited.Count(v => !v) > 1)
             {
-                for (int i = 0; i < scanners.Count; i++)
+                (int x, int y, int z, int rot) combined = (0, 0, 0, -1);
+
+                for (int j = 1; j < scanners.Count; j++)
                 {
-                    if (visited[i])
+                    if (visited[j])
                     {
                         continue;
                     }
 
-                    (int x, int y, int z, int rot) combined = (0, 0, 0, -1);
-
-                    for (int j = i + 1; j < scanners.Count; j++)
-                    {
-                        if (visited[j])
-                        {
-                            continue;
-                        }
-
-                        combined = CombineScannersWithLocation(scanners[i], scanners[j]);
-
-                        if (combined.rot != -1)
-                        {
-                            visited[j] = true;
-                            distances[i][j] = (combined.rot, combined.x, combined.y, combined.z);
-                            Console.WriteLine($"Scanners {i} and {j} align, remaining {visited.Count(v => !v)}");
-                            break;
-                        }
-                    }
+                    combined = CombineScanners(scanners[0], scanners[j]);
 
                     if (combined.rot != -1)
                     {
-                        break;
+                        visited[j] = true;
+                        distances[0][j] = (combined.rot, combined.x, combined.y, combined.z);
+                        Console.WriteLine($"Scanners {0} and {j} align, remaining {visited.Count(v => !v)}");
                     }
                 }
             }
@@ -329,31 +288,30 @@ namespace AdventOfCode2021.Solution
             Console.WriteLine(best);
         }
 
-        private (int x, int y, int z, int rot) CombineScannersWithLocation(List<Beacon> s1, List<Beacon> s2)
+        private (int x, int y, int z, int rot) CombineScanners(List<Beacon> s1, List<Beacon> s2)
         {
             HashSet<Beacon> hs1 = new HashSet<Beacon>(s1);
+
+            int idx = rng.Next(s1.Count);
 
             for (int i = 0; i < 24; i++)
             {
                 var rotatedS2 = s2.Select(b => b.GetRotation(i)).ToList();
 
-                for (int j = 0; j < s1.Count; j++)
+                for (int k = 0; k < rotatedS2.Count; k++)
                 {
-                    for (int k = 0; k < rotatedS2.Count; k++)
+                    var (x, y, z) = GetOffset(s1[idx], rotatedS2[k]);
+
+                    var offsetS2 = rotatedS2.Select(b => new Beacon(b.x + x, b.y + y, b.z + z)).ToList();
+                    HashSet<Beacon> hs2 = new HashSet<Beacon>(offsetS2);
+
+                    if (hs1.Intersect(hs2).Count() >= 12)
                     {
-                        var (x, y, z) = GetOffset(s1[j], rotatedS2[k]);
+                        s1.AddRange(hs2.Except(hs1));
 
-                        var offsetS2 = rotatedS2.Select(b => new Beacon(b.x + x, b.y + y, b.z + z)).ToList();
-                        HashSet<Beacon> hs2 = new HashSet<Beacon>(offsetS2);
+                        s2.Clear();
 
-                        if (hs1.Intersect(hs2).Count() >= 12)
-                        {
-                            s1.AddRange(hs2.Except(hs1));
-
-                            s2.Clear();
-
-                            return (x, y, z, i);
-                        }
+                        return (x, y, z, i);
                     }
                 }
             }
