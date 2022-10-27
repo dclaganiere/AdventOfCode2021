@@ -1,7 +1,13 @@
 ﻿
 using AdventOfCode2021.Solution;
+using System.Diagnostics;
 
-Day19A day = new();
+Day20 day = new();
 
-day.SolveA();
-day.SolveB();
+Stopwatch sw = Stopwatch.StartNew();
+
+    day.SolveA();
+    day.SolveB();
+sw.Stop();
+
+Console.WriteLine(sw.Elapsed.ToString());
