@@ -2,7 +2,7 @@
 using AdventOfCode2021.Solution;
 using System.Diagnostics;
 
-Day21 day = new();
+Day22 day = new();
 
 Stopwatch sw = Stopwatch.StartNew();
 
